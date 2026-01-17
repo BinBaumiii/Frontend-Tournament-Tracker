@@ -1,9 +1,5 @@
 <template>
-  <div id="app">
-    <h1>Tournament Tracker</h1>
-    <br>
-    <PlayerList />
-  </div>
+  <router-view />
 </template>
 
 <script>
