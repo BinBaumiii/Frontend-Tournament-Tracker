@@ -1,15 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import TournamentsView from '../views/TournamentsView.vue'
 
-const routes = [
-  { path: '/', name: 'home', component: TournamentsView },
-  { path: '/create', name: 'create', component: HomeView },
-]
+import TournamentsView from '@/views/TournamentsView.vue'
+import CreateTournamentView from '@/views/CreateTournamentView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes: [
+    {
+      path: '/',
+      redirect: '/tournaments'
+    },
+    {
+      path: '/tournaments',
+      component: TournamentsView
+    },
+    {
+      path: '/tournaments/new',
+      component: CreateTournamentView
+    }
+  ]
 })
 
 export default router
