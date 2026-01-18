@@ -1,6 +1,10 @@
 <script setup>
-import { reactive } from 'vue'
-import { createTournament } from '@/services/TournamentService'
+import { reactive, watch } from 'vue'
+import { createTournament, updateTournament } from '@/services/TournamentService'
+
+const props = defineProps({
+  tournament: Object // null = neues Turnier, Objekt = bestehendes Turnier
+})
 
 const emit = defineEmits(['close', 'saved'])
 
@@ -14,6 +18,38 @@ const tournament = reactive({
   },
   winner: ''
 })
+
+watch(
+  () => props.tournament,
+  (t) => {
+    if (!t) return
+
+    tournament.name = t.name
+    tournament.winner = t.winner || ''
+
+    // players ist im Backend eine Map → in Array umwandeln
+    tournament.players = Array.from({ length: 8 }, (_, i) => t.players[i + 1] || '')
+
+    const results = t.results || {}
+    let matchId = 1
+
+    // Viertelfinale
+    tournament.matches.qf.forEach((m, i) => {
+      m.a = tournament.players[i * 2] || ''
+      m.b = tournament.players[i * 2 + 1] || ''
+      m.result = results[matchId++] || ''
+    })
+
+    // Halbfinale
+    tournament.matches.sf.forEach((m) => {
+      m.result = results[matchId++] || ''
+    })
+
+    // Finale
+    tournament.matches.final.result = results[matchId] || ''
+  },
+  { immediate: true }
+)
 
 // Ergebnisse für die Entity vorbereiten
 function buildResults() {
@@ -48,13 +84,19 @@ async function save() {
   const results = buildResults()
   const scoreboard = buildScoreboard()
 
-  await createTournament({
+  const payload = {
     name: tournament.name,
     winner: tournament.winner,
     players: Object.fromEntries(tournament.players.map((p, i) => [i + 1, p])),
     results,
     scoreboard
-  })
+  }
+
+  if (props.tournament?.id) {
+    await updateTournament(props.tournament.id, payload)
+  } else {
+    await createTournament(payload)
+  }
 
   emit('saved')
   emit('close')
@@ -64,7 +106,9 @@ async function save() {
 <template>
   <div class="overlay">
     <div class="editor">
-      <h2>🏆 Neues Turnier</h2>
+      <h2>
+        {{ props.tournament ? '🏆 Turnier bearbeiten' : '🏆 Neues Turnier' }}
+      </h2>
       <input v-model="tournament.name" placeholder="Turniername" />
 
       <div class="bracket">

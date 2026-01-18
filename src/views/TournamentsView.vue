@@ -7,6 +7,7 @@ import TournamentEditor from '@/components/TournamentEditor.vue'
 
 const tournaments = ref([])
 const showEditor = ref(false)
+const selectedTournament = ref(null) // 👈 NEU
 
 async function load() {
   tournaments.value = await getTournaments()
@@ -18,6 +19,24 @@ async function remove(id) {
   await load()
 }
 
+// 👁 Turnier anschauen
+function viewTournament(tournament) {
+  selectedTournament.value = tournament
+  showEditor.value = true
+}
+
+// ✏️ Turnier bearbeiten
+function editTournament(tournament) {
+  selectedTournament.value = tournament
+  showEditor.value = true
+}
+
+// ➕ Neues Turnier
+function createNewTournament() {
+  selectedTournament.value = null
+  showEditor.value = true
+}
+
 onMounted(load)
 </script>
 
@@ -25,19 +44,28 @@ onMounted(load)
   <div>
     <h1>🏆 Tournaments</h1>
 
-    <!-- Button -->
-    <CreateTournamentButton @open="showEditor = true" />
+    <!-- Neuer Turnier Button -->
+    <CreateTournamentButton @open="createNewTournament" />
 
-    <!-- Editor -->
+    <!-- Editor (neu + anschauen + bearbeiten) -->
     <TournamentEditor
       v-if="showEditor"
-      @close="showEditor = false"
-      @saved="load"
+      :tournament="selectedTournament"
+    @close="showEditor = false"
+    @saved="load"
     />
 
     <ul>
       <li v-for="t in tournaments" :key="t.id">
         {{ t.name }} – Winner: {{ t.winner }}
+
+        <!-- 👁 Anschauen -->
+        <button @click="viewTournament(t)">👁</button>
+
+        <!-- ✏️ Bearbeiten -->
+        <button @click="editTournament(t)">✏️</button>
+
+        <!-- 🗑 Löschen -->
         <button @click="remove(t.id)">🗑</button>
       </li>
     </ul>

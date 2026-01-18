@@ -5,9 +5,25 @@ export async function getTournaments() {
   return await response.json();
 }
 
+export async function getTournamentById(id) {
+  const response = await fetch(`${API_URL}/tournaments/${id}`);
+  return await response.json();
+}
+
 export async function createTournament(tournament) {
   const response = await fetch(`${API_URL}/tournaments`, {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(tournament)
+  });
+  return await response.json();
+}
+
+export async function updateTournament(id, tournament) {
+  const response = await fetch(`${API_URL}/tournaments/${id}`, {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
     },
