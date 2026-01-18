@@ -14,7 +14,7 @@ const emit = defineEmits(['close', 'saved'])
 
 const tournament = reactive({
   name: '',
-  players: Array(8).fill(''),
+  players: Array(14).fill(''), // 8 Viertelfinale + 4 Halbfinale + 2 Finale
   matches: {
     qf: Array(4).fill(null).map(() => ({ a: '', b: '', result: '' })),
     sf: Array(2).fill(null).map(() => ({ a: '', b: '', result: '' })),
@@ -28,21 +28,29 @@ watch(() => props.tournament, (t) => {
 
   tournament.name = t.name
   tournament.winner = t.winner || ''
-  tournament.players = Array.from({ length: 8 }, (_, i) => t.players[i + 1] || '')
+  // Load all 14 players
+  tournament.players = Array.from({ length: 14 }, (_, i) => t.players[i + 1] || '')
 
   const results = t.results || {}
   let matchId = 1
 
+  // Viertelfinale
   tournament.matches.qf.forEach((m, i) => {
     m.a = tournament.players[i * 2] || ''
     m.b = tournament.players[i * 2 + 1] || ''
     m.result = results[matchId++] || ''
   })
 
-  tournament.matches.sf.forEach((m) => {
+  // Halbfinale
+  tournament.matches.sf.forEach((m, i) => {
+    m.a = tournament.players[8 + i * 2] || ''
+    m.b = tournament.players[8 + i * 2 + 1] || ''
     m.result = results[matchId++] || ''
   })
 
+  // Finale
+  tournament.matches.final.a = tournament.players[12] || ''
+  tournament.matches.final.b = tournament.players[13] || ''
   tournament.matches.final.result = results[matchId] || ''
 }, { immediate: true })
 
@@ -53,6 +61,16 @@ function buildResults() {
   tournament.matches.sf.forEach(m => results[matchId++] = m.result)
   results[matchId] = tournament.matches.final.result
   return results
+}
+
+function collectPlayers() {
+  const allPlayers = []
+
+  tournament.matches.qf.forEach(m => { allPlayers.push(m.a, m.b) })
+  tournament.matches.sf.forEach(m => { allPlayers.push(m.a, m.b) })
+  allPlayers.push(tournament.matches.final.a, tournament.matches.final.b)
+
+  return Object.fromEntries(allPlayers.map((p, i) => [i + 1, p]))
 }
 
 function buildScoreboard() {
@@ -71,7 +89,7 @@ async function save() {
   const payload = {
     name: tournament.name,
     winner: tournament.winner,
-    players: Object.fromEntries(tournament.players.map((p, i) => [i + 1, p])),
+    players: collectPlayers(), // <-- jetzt 14 Spieler
     results,
     scoreboard
   }

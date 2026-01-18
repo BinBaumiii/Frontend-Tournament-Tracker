@@ -23,7 +23,8 @@ function onSaved() {
 <template>
   <TournamentEditor
     v-if="tournament"
-    :modelValue="tournament"
+    :tournament="tournament"
+    mode="edit"
     @saved="onSaved"
     @close="onSaved"
   />
