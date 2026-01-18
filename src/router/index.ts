@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import TournamentsView from '@/views/TournamentsView.vue'
 import CreateTournamentView from '@/views/CreateTournamentView.vue'
+import ScoreboardView from '@/views/ScoreboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,6 +10,10 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/tournaments'
+    },
+    {
+      path: '/scoreboard',
+      component: ScoreboardView
     },
     {
       path: '/tournaments',
