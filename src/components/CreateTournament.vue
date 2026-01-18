@@ -1,38 +1,31 @@
 <script setup>
-import { ref } from 'vue'
-import { createTournament } from '@/services/TournamentService'
+import { useRouter } from 'vue-router'
+import TournamentEditor from '@/components/TournamentEditor.vue'
 
-const emit = defineEmits(['created'])
+const router = useRouter()
 
-const name = ref('')
-const winner = ref('')
+function onSaved() {
+  router.push('/tournaments')
+}
 
-async function submit() {
-  if (!name.value) return
-
-  await createTournament({
-    name: name.value,
-    winner: winner.value,
-    owner: '',
-    players: {},
-    results: {},
-    scoreboard: {}
-  })
-
-  name.value = ''
-  winner.value = ''
-
-  emit('created') // Eltern-Komponente informieren
+function onCancel() {
+  router.push('/tournaments')
 }
 </script>
 
 <template>
-  <form @submit.prevent="submit">
-    <h3>➕ Neues Turnier</h3>
-
-    <input v-model="name" placeholder="Turniername" />
-    <input v-model="winner" placeholder="Gewinner" />
-
-    <button>Erstellen</button>
-  </form>
+  <div class="create-page">
+    <TournamentEditor
+      @saved="onSaved"
+      @close="onCancel"
+    />
+  </div>
 </template>
+
+<style scoped>
+.create-page {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+</style>
